@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\Domains\DestroyDomainRequest;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Redirects\DestroyRedirectRequest;
 use App\Http\Requests\Redirects\RedirectListRequest;
 use App\Http\Requests\Redirects\StoreRedirectRequest;
 use App\Traits\ApiTrait;
-use Illuminate\Http\Request;
 
 class RedirectController extends Controller
 {
