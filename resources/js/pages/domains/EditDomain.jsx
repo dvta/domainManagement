@@ -18,7 +18,6 @@ export default function () {
   }, []);
 
   const onFinish = (values) => {
-    console.log('Success:', values);
     let formData = new FormData();
 
     Object.entries(values).forEach(([property, value]) => {

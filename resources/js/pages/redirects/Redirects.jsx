@@ -31,8 +31,6 @@ export default function () {
 
   function handleDropdownClick(record) {
     setOpen(true);
-    // Access the record and perform actions here
-    console.log('Clicked on dropdown action item with record:', record);
   }
 
   const columns = [
@@ -89,14 +87,12 @@ export default function () {
 
   useEffect(() => {
     axios.get('/api/redirects').then(res => {
-      console.log(res.data.data)
       setRedirects(res.data.data)
       setLoading(false)
     })
   }, [])
 
   const onSelectChange = (newSelectedRowKeys) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
   const [alert, contextHolder] = notification.useNotification();
@@ -126,9 +122,7 @@ export default function () {
       },
       onOk() {
         setLoading(true);
-        console.log(record.domain + url);
         axios.post('/api/redirects', formData).then(res => {
-          console.log(res.data)
           if (res.data.result === 'success') {
             setRedirects(redirects.filter((item) => item.domain !== record.domain))
             openNotificationWithIcon('success', res.data.result, res.data.data.msg);
@@ -139,7 +133,6 @@ export default function () {
         })
       },
       onCancel() {
-        console.log('Cancel');
       }
     });
   }

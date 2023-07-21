@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Emails\DestroyEmailRequest;
 use App\Http\Requests\Emails\EmailListRequest;
 use App\Http\Requests\Emails\StoreEmailRequest;
 use App\Http\Requests\Emails\UpdateEmailPasswordRequest;
 use App\Http\Requests\Emails\UpdateEmailQuotaRequest;
 use App\Traits\ApiTrait;
-use Illuminate\Http\Request;
 
 class EmailController extends Controller
 {

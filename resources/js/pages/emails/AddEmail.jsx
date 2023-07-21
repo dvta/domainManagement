@@ -1,4 +1,4 @@
-import {Alert, Button, Card, Form, Input, Select, Space} from 'antd';
+import {Alert, Button, Card, Form, Input, InputNumber, Select, Space} from 'antd';
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import Password from "antd/es/input/Password.js";
@@ -34,7 +34,6 @@ export default function () {
 
   useEffect(() => {
     axios.get('/api/domains').then(res => {
-      console.log(res.data.data)
       setDomains(res.data.data)
       setLoading(false)
     })
@@ -42,7 +41,6 @@ export default function () {
 
 
   const onFinish = (values) => {
-    console.log('Success:', values);
     setLoading(true)
     axios.post('/api/emails', values).then((res) => {
       setLoading(false);
@@ -65,6 +63,7 @@ export default function () {
   const generatePassword = () => {
     let password = Math.random().toString(36).slice(-8);
     form.setFieldsValue({password: password});
+    form.setFieldsValue({password_confirmation: password});
   }
 
   return <Card title="Add Email">
@@ -117,6 +116,18 @@ export default function () {
         name="password"
         validateStatus={validationErrors.password && 'error'}
         help={validationErrors.password && validationErrors.password[0]}
+      >
+        <Password
+          placeholder="Password"
+          id="password"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Confirm Password"
+        name="password_confirmation"
+        validateStatus={validationErrors.password_confirmation && 'error'}
+        help={validationErrors.password_confirmation && validationErrors.password_confirmation[0]}
         extra={
           <Button
             style={
@@ -131,8 +142,8 @@ export default function () {
         }
       >
         <Password
-          placeholder="Password"
-          id="password"
+          placeholder="Confirm Password"
+          id="password_confirmation"
         />
       </Form.Item>
 
@@ -142,16 +153,19 @@ export default function () {
         validateStatus={validationErrors.quota && 'error'}
         help={validationErrors.quota && validationErrors.quota[0]}
       >
-        <Input
+        <InputNumber
           placeholder="Quota"
+          min="0"
+          max="100000"
+          step="10"
           addonAfter="MB"
+          defaultValue={100}
           style={
             {
               width: 150
             }
           }
         />
-
       </Form.Item>
 
       <Form.Item

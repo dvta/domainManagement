@@ -11,8 +11,8 @@ export default function () {
   const [serverErrors, setServerErrors] = useState([]);
 
   const onFinish = (values) => {
-    console.log('Success:', values);
     setLoading(true)
+    values.path = values.domain;
     axios.post('/api/domains', values).then((res) => {
       setLoading(false);
       if (res.data.result === 'success') {
@@ -67,20 +67,6 @@ export default function () {
         help={validationErrors.domain && validationErrors.domain[0]}
       >
         <Input placeholder='domain.com'/>
-      </Form.Item>
-
-      <Form.Item
-        label="Path"
-        name="path"
-        rules={[
-          {
-            required: true,
-          }
-        ]}
-        validateStatus={validationErrors.path && 'error'}
-        help={validationErrors.path && validationErrors.path[0]}
-      >
-        <Input placeholder="Domain Path"/>
       </Form.Item>
 
       <Form.Item

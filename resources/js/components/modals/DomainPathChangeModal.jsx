@@ -2,8 +2,7 @@ import {Form, Input, Modal} from "antd";
 
 export default function ({open, onCreate, onCancel, data}) {
   const [form] = Form.useForm();
-  console.log('open', open);
-  console.log('onCreate', data);
+
   return (
     <Modal
       open={open}

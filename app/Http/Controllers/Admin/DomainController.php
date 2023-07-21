@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Domains\DestroyDomainRequest;
 use App\Http\Requests\Domains\DomainListRequest;
 use App\Http\Requests\Domains\StoreDomainRequest;
 use App\Http\Requests\Domains\UpdateDomainRequest;
 use App\Traits\ApiTrait;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class DomainController extends Controller
 {

@@ -1,5 +1,5 @@
-import {Alert, Badge, Button, Card, Dropdown, Menu, Modal, notification, Space, Spin, Switch, Table} from 'antd';
-import React, {useEffect, useState} from 'react';
+import {Button, Card, Dropdown, Menu, Modal, notification, Space, Form, Switch, Table, InputNumber} from 'antd';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {CalculatorOutlined, DeleteOutlined, EditOutlined, SettingFilled} from "@ant-design/icons";
 import {Link, useNavigate} from "react-router-dom";
 
@@ -9,15 +9,18 @@ export default function () {
   const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const [showAlert, setShowAlert] = useState(false);
+  const [domains, setDomains] = useState([]);
+  const EditableContext = React.createContext(null);
 
-  const domainFilters = emails.map(email => {
+
+
+  const emailFilters = domains.map(email => {
     return {
-      text: email.maildomain,
-      value: email.maildomain
+      text: email.domain,
+      value: email.domain,
     }
   });
-  const columns = [
+  const defaultColumns = [
     {
       title: 'Email',
       dataIndex: 'email',
@@ -25,7 +28,7 @@ export default function () {
     {
       title: 'Domain',
       dataIndex: 'maildomain',
-      filters: domainFilters,
+      filters: emailFilters,
       filterSearch: true,
       onFilter: (value, record) => record.maildomain.startsWith(value),
     },
@@ -43,12 +46,14 @@ export default function () {
     {
       title: 'Storage Used (MB)',
       dataIndex: 'storage_used',
+      width: '10%',
     },
     {
       title: 'Total Storage (MB)',
       dataIndex: 'storage_allocated_value',
+      editable: true,
+      width: '10%',
     },
-
     {
       title: 'Action',
 
@@ -61,14 +66,18 @@ export default function () {
 
   useEffect(() => {
     axios.get('/api/emails').then(res => {
-      console.log(res.data.data)
       setEmails(res.data.data)
       setLoading(false)
+    })
+  }, []);
+
+  useEffect(() => {
+    axios.get('/api/domains').then(res => {
+      setDomains(res.data.data)
     })
   }, [])
 
   const onSelectChange = (newSelectedRowKeys) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
   const [alert, contextHolder] = notification.useNotification();
@@ -97,7 +106,6 @@ export default function () {
       onOk() {
         setLoading(true);
         axios.post('/api/emails', formData).then(res => {
-          console.log(res.data)
           if (res.data.result === 'success') {
             setEmails(emails.filter((item) => item.email !== email))
             openNotificationWithIcon('success', res.data.result, res.data.data.msg);
@@ -108,11 +116,9 @@ export default function () {
         })
       },
       onCancel() {
-        console.log('Cancel');
       }
     });
   }
-
 
   const rowSelection = {
     selectedRowKeys,
@@ -147,6 +153,145 @@ export default function () {
       },
     ],
   };
+
+  // editable logic
+  const EditableRow = ({ index, ...props }) => {
+    const [form] = Form.useForm();
+    return (
+      <Form form={form} component={false}>
+        <EditableContext.Provider value={form}>
+          <tr {...props} />
+        </EditableContext.Provider>
+      </Form>
+    );
+  };
+  const EditableCell = ({
+                          title,
+                          editable,
+                          children,
+                          dataIndex,
+                          record,
+                          handleSave,
+                          ...restProps
+                        }) => {
+    const [editing, setEditing] = useState(false);
+    const inputRef = useRef(null);
+    const form = useContext(EditableContext);
+    useEffect(() => {
+      if (editing) {
+        inputRef.current.focus();
+      }
+    }, [editing]);
+    const toggleEdit = () => {
+      setEditing(!editing);
+      form.setFieldsValue({
+        [dataIndex]: record[dataIndex],
+      });
+    };
+    const save = async () => {
+      try {
+        const values = await form.validateFields();
+        toggleEdit();
+        handleSave({
+          ...record,
+          ...values,
+        });
+
+        let formData = new FormData();
+
+        Object.entries(values).forEach(([property, value]) => {
+          formData.append(`${property}`, value || '');
+        });
+
+        formData.append('email', record.email || '');
+        formData.append('quota', values.storage_allocated_value || '')
+        formData.append('_method', 'PATCH');
+
+        axios.post('/api/emails/change-quota', formData).then((res) => {
+          if (res.data.result === 'success') {
+            openNotificationWithIcon('success', res.data.result, res.data.data.msg);
+          }
+        })
+      } catch (errInfo) {
+        console.log('Save failed:', errInfo);
+      }
+    };
+    let childNode = children;
+    if (editable) {
+      childNode = editing ? (
+        <Form.Item
+          style={{
+            margin: 0,
+          }}
+          name={dataIndex}
+          rules={[
+            {
+              required: true,
+              message: `${title} is required.`,
+            },
+          ]}
+        >
+          <InputNumber
+            style={{
+              width: 200,
+            }}
+            min="0"
+            max="100000"
+            step="10"
+            stringMode
+            ref={inputRef}
+            onPressEnter={save}
+            loading={true}
+            enterButton
+          />
+        </Form.Item>
+      ) : (
+        <div
+          className="editable-cell-value-wrap"
+          style={{
+            paddingRight: 24,
+          }}
+          onClick={toggleEdit}
+        >
+          {children}
+        </div>
+      );
+
+    }
+    return <td {...restProps}>{childNode}</td>;
+  };
+  const handleSave = (row) => {
+    const newData = [...emails];
+    const index = newData.findIndex((item) => row.key === item.key);
+    const item = newData[index];
+    newData.splice(index, 1, {
+      ...item,
+      ...row,
+    });
+    setEmails(newData);
+  };
+  const components = {
+    body: {
+      cell: EditableCell,
+      row: EditableRow,
+    },
+  };
+  const columns = defaultColumns.map((col) => {
+    if (!col.editable) {
+      return col;
+    }
+    return {
+      ...col,
+      onCell: (record) => ({
+        record,
+        editable: col.editable,
+        dataIndex: col.dataIndex,
+        title: col.title,
+        handleSave,
+      }),
+    };
+  });
+
   return (
     <>
       <Card title="Emails" extra={
@@ -173,8 +318,13 @@ export default function () {
         </Space>
       }>
         {contextHolder}
-        <Table rowSelection={rowSelection} columns={columns} dataSource={emails} rowKey='email'
+        <Table rowSelection={rowSelection}
+               columns={columns}
+               dataSource={emails}
+               rowKey='email'
                loading={loading}
+               components={components}
+               rowClassName={() => 'editable-row'}
         />
       </Card>
     </>

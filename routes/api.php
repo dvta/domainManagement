@@ -1,9 +1,7 @@
 <?php
 
-use App\Http\Controllers\DomainController;
-use App\Http\Controllers\EmailController;
-use App\Http\Controllers\RedirectController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Admin\DomainController;
+use App\Http\Controllers\Admin\EmailController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,9 +20,9 @@ Route::apiResource('domains', DomainController::class)->only('index', 'store');
 Route::patch('domains/update-path', [DomainController::class, 'updatePath']);
 Route::delete('domains', [DomainController::class, 'destroy']);
 
-//Redirects
-Route::apiResource('redirects', RedirectController::class)->only('index', 'store');
-Route::delete('redirects', [RedirectController::class, 'destroy']);
+//Redirects - not implemented
+//Route::apiResource('redirects', RedirectController::class)->only('index', 'store');
+//Route::delete('redirects', [RedirectController::class, 'destroy']);
 
 //Emails
 Route::apiResource('emails', EmailController::class)->only('index', 'store');
@@ -33,3 +31,6 @@ Route::controller(EmailController::class)->group(function () {
     Route::patch('emails/change-quota', 'changeQuota');
     Route::patch('emails/change-password', 'changePassword');
 });
+
+
+Route::get('user/email/inbox', [EmailController::class, 'inbox']);

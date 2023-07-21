@@ -13,7 +13,6 @@ export default function () {
 
   useEffect(() => {
     axios.get('/api/domains').then(res => {
-      console.log(res.data.data)
       setDomains(res.data.data)
       setLoading(false)
     })
