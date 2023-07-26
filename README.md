@@ -3,6 +3,7 @@
 ## How run the project
 
 - Clone the project
+- Set the .env file
 - Run `composer install`
 - run `npm install`
 - run `npm run dev'` (use nvm 18)
