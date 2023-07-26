@@ -11,6 +11,7 @@ import AddEmail from "../pages/emails/AddEmail.jsx";
 import EditEmailQuota from "../pages/emails/EditEmailQuota.jsx";
 import EditEmailPassword from "../pages/emails/EditEmailPassword.jsx";
 import AddRedirect from "../pages/redirects/AddRedirect.jsx";
+import UserEmails from "../pages/Inbox/UserEmails.jsx";
 
 
 export default function () {
@@ -29,9 +30,12 @@ export default function () {
           <Route path={"/emails/change-quota"} element={<EditEmailQuota/>}/>
           <Route path={"/emails/change-password"} element={<EditEmailPassword/>}/>
 
-
           <Route path={"/redirects"} element={<Redirects/>}/>
           <Route path={"/redirects/create"} element={<AddRedirect/>}/>
+        </Route>
+
+        <Route>
+          <Route path={'email/:type?'} element={<UserEmails/>}/>
         </Route>
       </Routes>
     </BrowserRouter>
