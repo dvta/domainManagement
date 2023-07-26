@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DomainController;
+use App\Http\Controllers\User\EmailController as UserEmailController;
 use App\Http\Controllers\Admin\EmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,5 +33,6 @@ Route::controller(EmailController::class)->group(function () {
     Route::patch('emails/change-password', 'changePassword');
 });
 
+Route::get('user/emails', [UserEmailController::class, 'index']);
+Route::get('user/emails/filters', [UserEmailController::class, 'filters']);
 
-Route::get('user/email/inbox', [EmailController::class, 'inbox']);
